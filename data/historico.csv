@@ -1,0 +1,13 @@
+codigo;dia;de;para
+001;2;aberta;em_analise
+002;3;aberta;em_analise
+001;4;em_analise;concluida
+003;4;aberta;em_analise
+003;5;em_analise;concluida
+004;6;aberta;em_analise
+005;8;aberta;em_analise
+006;8;aberta;em_analise
+002;9;em_analise;concluida
+004;12;em_analise;concluida
+008;12;aberta;em_analise
+009;14;aberta;em_analise

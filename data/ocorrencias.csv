@@ -1,0 +1,17 @@
+id;categoria;descricao;bairro;espaco;dia_abertura;status;dia_conclusao
+001;iluminacao;Refletor da quadra apagado à noite;Vila Aurora;quadra;1;concluida;4
+002;acessibilidade;Rampa de acesso à quadra com degrau quebrado;Vila Aurora;quadra;2;concluida;9
+003;limpeza;Lixo acumulado ao redor dos bancos;Vila Aurora;praca;3;concluida;5
+004;conservacao;Tela de proteção da quadra rasgada;Vila Aurora;quadra;4;concluida;12
+005;iluminacao;Poste da praça piscando;Jardim Estelar;praca;6;em_analise;
+006;acessibilidade;Calçada sem rebaixamento perto da escola;Jardim Estelar;rota_escolar;7;em_analise;
+007;;Lixeira tombada na praça;Jardim Estelar;praca;8;aberta;
+008;conservacao;Bancos quebrados na pista de caminhada;Jardim Estelar;pista;9;em_analise;
+009;iluminacao;Trecho final da pista de caminhada sem luz;Jardim Estelar;pista;10;em_analise;
+010;acessibilidade;Piso tátil danificado na rota da escola;Parque Orion;rota_escolar;11;aberta;
+011;limpeza;Caçamba cheia ao lado da quadra;Parque Orion;quadra;13;aberta;
+012;conservacao;Cesta de basquete solta;Parque Orion;quadra;9;concluida;3
+013;limpeza;Folhas acumuladas na calçada;Parque Orion;calcada;15;aberta;
+014;conservacao;Buraco na calçada da rota da escola;Vila Aurora;rota_escolar;17;aberta;
+015;iluminacao;Rua da escola com iluminação fraca;Jardim Estelar;rota_escolar;18;aberta;
+016;acessibilidade;Falta corrimão na escada da praça;Parque Orion;praca;19;aberta;
