@@ -83,3 +83,51 @@ def atualizar_status(sistema, codigo, novo_status):
 
     return True, ("Ocorrência " + codigo + ": " + NOMES_STATUS[antiga] + " -> " + NOMES_STATUS[novo_status]
                   + " (dia " + str(sistema["dia_atual"]) + ").")
+
+
+def examinar_proxima(sistema):
+    """ PROTÓTIPO: examinar_proxima(sistema: dict): tuple[bool, str]
+    Tira a primeira da fila (a aberta há mais tempo) e a coloca EM ANÁLISE. Se a fila
+    estiver vazia, avisa que não há demandas esperando. """
+
+    if len(sistema["fila"]) == 0:
+        return False, "A fila está vazia: não há ocorrências aguardando exame."
+    return atualizar_status(sistema, sistema["fila"][0], "em_analise")
+
+
+def inserir_na_fila(sistema, ocorrencia):
+    """ PROTÓTIPO: inserir_na_fila(sistema: dict, ocorrencia: dict): None
+    Devolve uma ocorrência à fila no lugar certo (por dia de abertura e, em empate, por
+    código), para a ordem de registro continuar valendo. """
+
+    fila = sistema["fila"]
+    posicao = len(fila)
+    for i in range(len(fila)):
+        outra = sistema["indice"][fila[i]]
+        if (ocorrencia["dia_abertura"], ocorrencia["id"]) < (outra["dia_abertura"], outra["id"]):
+            posicao = i
+            break
+    fila.insert(posicao, ocorrencia["id"])
+
+
+def desfazer_ultima(sistema):
+    """ PROTÓTIPO: desfazer_ultima(sistema: dict): tuple[bool, str]
+    Usa a pilha: tira o evento do topo (a última atualização) e volta a ocorrência para a
+    situação anterior. Também apaga o evento do histórico e, se a ocorrência voltou a ser
+    ABERTA, devolve ela à fila. """
+
+    if len(sistema["pilha"]) == 0:
+        return False, "Não há atualizações para desfazer."
+
+    evento = sistema["pilha"].pop()
+    sistema["historico"].pop()
+
+    ocorrencia = sistema["indice"][evento["codigo"]]
+    ocorrencia["status"] = evento["de"]
+    if evento["para"] == "concluida":
+        ocorrencia["dia_conclusao"] = None
+    if evento["de"] == "aberta":
+        inserir_na_fila(sistema, ocorrencia)
+
+    return True, ("Atualização desfeita: ocorrência " + evento["codigo"] + " voltou de "
+                  + NOMES_STATUS[evento["para"]] + " para " + NOMES_STATUS[evento["de"]] + ".")
