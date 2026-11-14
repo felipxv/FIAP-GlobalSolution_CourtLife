@@ -1,14 +1,17 @@
 """ CourtLife: painel comunitário de ocorrências em espaços de convivência (terminal).
- Código para interação com usuário: menu, perguntas e mensagens. 
- 
- Como executar:  python src/sistema.py """
+ Este arquivo só cuida da conversa com a pessoa (menu, perguntas e mensagens). Os dados ficam em
+ dados.py, as regras em validacao.py, as consultas em consultas.py, o acompanhamento em
+ acompanhamento.py e os indicadores em indicadores.py.
 
-from constantes import CATEGORIAS, NOMES_CATEGORIA, STATUS, NOMES_STATUS, ESPACOS, NOMES_ESPACO
+ Como executar (na pasta do projeto):  python src/sistema.py """
+
+from constantes import (CATEGORIAS, NOMES_CATEGORIA, STATUS, NOMES_STATUS, SIGNIFICADO_STATUS,
+                        ESPACOS, NOMES_ESPACO, LIMITE_DIAS_URGENTE)
 from dados import carregar_sistema
 from consultas import (normalizar_codigo, buscar_por_codigo, filtrar_ocorrencias, mostrar_lista,
                        local_generico)
-from acompanhamento import cadastrar_ocorrencia, atualizar_status
-from indicadores import avaliar_prioridade, dias_comprometidos
+from acompanhamento import (cadastrar_ocorrencia, atualizar_status, examinar_proxima, desfazer_ultima)
+from indicadores import avaliar_prioridade, listar_urgentes, mostrar_painel, dias_comprometidos
 
 
 def ler_texto(pergunta, se_acabar=""):
@@ -175,6 +178,145 @@ def opcao_atualizar(sistema):
         print("ERRO: " + mensagem)
 
 
+def opcao_examinar(sistema):
+    """ PROTÓTIPO: opcao_examinar(sistema: dict): None
+    Tira a próxima ocorrência da fila e a coloca em análise. """
+
+    print("\n--- EXAMINAR A PRÓXIMA DA FILA ---")
+    if len(sistema["fila"]) > 0:
+        print("Fila de espera (primeira a ser examinada à esquerda): " + ", ".join(sistema["fila"]))
+    else:
+        print("Fila de espera: vazia")
+    examinou, mensagem = examinar_proxima(sistema)
+    if examinou:
+        print("OK: " + mensagem)
+    else:
+        print("AVISO: " + mensagem)
+
+
+def opcao_eventos(sistema):
+    """ PROTÓTIPO: opcao_eventos(sistema: dict): None
+    Mostra os 5 eventos mais recentes, olhando a pilha do topo para baixo (sem retirar nada). """
+
+    print("\n--- EVENTOS RECENTES (do mais novo para o mais antigo) ---")
+    pilha = sistema["pilha"]
+    if len(pilha) == 0:
+        print("Ainda não há atualizações registradas.")
+        return
+    mostrados = 0
+    posicao = len(pilha) - 1
+    while posicao >= 0 and mostrados < 5:
+        evento = pilha[posicao]
+        print(f"dia {evento['dia']}: ocorrência {evento['codigo']}: "
+              f"{NOMES_STATUS[evento['de']]} -> {NOMES_STATUS[evento['para']]}")
+        mostrados += 1
+        posicao -= 1
+    print(f"({len(pilha)} evento(s) no total; o último da lista é o primeiro a ser desfeito na opção 8.)")
+
+
+def opcao_desfazer(sistema):
+    """ PROTÓTIPO: opcao_desfazer(sistema: dict): None """
+
+    print("\n--- DESFAZER A ÚLTIMA ATUALIZAÇÃO ---")
+    desfez, mensagem = desfazer_ultima(sistema)
+    if desfez:
+        print("OK: " + mensagem)
+    else:
+        print("AVISO: " + mensagem)
+
+
+def opcao_indicadores(sistema):
+    """ PROTÓTIPO: opcao_indicadores(sistema: dict): None """
+
+    mostrar_painel(sistema)
+
+
+def opcao_prioridades(sistema):
+    """ PROTÓTIPO: opcao_prioridades(sistema: dict): None
+    Mostra as urgentes e explica, para cada pendente, por que é ou não urgente. """
+
+    dia = sistema["dia_atual"]
+    print("\n--- PRIORIDADES ---")
+    print("Regra: URGENTE = (espaço de convivência OU acessibilidade)")
+    print(f"                 E mais de {LIMITE_DIAS_URGENTE} dias desde a abertura")
+    print("                 E NÃO estar em análise nem concluída.")
+    urgentes = listar_urgentes(sistema["ocorrencias"], dia)
+    if len(urgentes) == 0:
+        print("\nNenhuma ocorrência urgente no momento.")
+    else:
+        print(f"\nURGENTES ({len(urgentes)}):")
+        for ocorrencia in urgentes:
+            motivo = avaliar_prioridade(ocorrencia, dia)[1]
+            print(f"   {ocorrencia['id']} - {NOMES_CATEGORIA[ocorrencia['categoria']]}, {local_generico(ocorrencia)}: {motivo}")
+    print("\nDemais pendentes:")
+    mostrou = False
+    for ocorrencia in sistema["ocorrencias"]:
+        urgente, motivo = avaliar_prioridade(ocorrencia, dia)
+        if not urgente and ocorrencia["status"] != "concluida":
+            print(f"   {ocorrencia['id']} - {motivo}")
+            mostrou = True
+    if not mostrou:
+        print("   (nenhuma)")
+
+
+def mostrar_hierarquia(no, indice, recuo):
+    """ PROTÓTIPO: mostrar_hierarquia(no: dict | list, indice: dict, recuo: str): None
+    Percorre a hierarquia bairro -> categoria -> códigos. É recursiva: se o nó é um
+    dicionário, desce um nível para cada chave; se é uma lista, imprime as ocorrências. """
+
+    if isinstance(no, dict):
+        for chave in no:
+            if chave in NOMES_CATEGORIA:
+                print(f"{recuo}{NOMES_CATEGORIA[chave]} ({len(no[chave])})")
+            else:
+                print(f"{recuo}{chave}")
+            mostrar_hierarquia(no[chave], indice, recuo + "   ")
+    else:
+        for codigo in no:
+            print(f"{recuo}{codigo} [{NOMES_STATUS[indice[codigo]['status']]}] {indice[codigo]['descricao']}")
+
+
+def opcao_hierarquia(sistema):
+    """ PROTÓTIPO: opcao_hierarquia(sistema: dict): None """
+
+    print("\n--- HIERARQUIA: BAIRRO > CATEGORIA > OCORRÊNCIAS ---")
+    mostrar_hierarquia(sistema["hierarquia"], sistema["indice"], "")
+
+
+def opcao_avancar_dia(sistema):
+    """ PROTÓTIPO: opcao_avancar_dia(sistema: dict): None
+    Avança o relógio simulado. Os dias passam, e as ocorrências abertas ficam mais antigas. """
+
+    texto = ler_texto("Quantos dias avançar? (Enter = 1): ")
+    if texto == "":
+        texto = "1"
+    if not texto.isdigit() or int(texto) < 1:
+        print("ERRO: digite um número inteiro maior que zero.")
+        return
+    sistema["dia_atual"] += int(texto)
+    print(f"OK: agora é o dia simulado {sistema['dia_atual']}.")
+
+
+def opcao_ajuda(sistema):
+    """ PROTÓTIPO: opcao_ajuda(sistema: dict): None
+    Orientações: o que significa cada situação e como o sistema funciona. """
+
+    print("\n--- AJUDA ---")
+    print("Situações:")
+    for status in STATUS:
+        print(f"   {NOMES_STATUS[status]}: {SIGNIFICADO_STATUS[status]}")
+    print("Mudanças permitidas: ABERTA -> EM ANÁLISE -> CONCLUÍDA (sempre nessa ordem).")
+    categorias = []
+    for categoria in CATEGORIAS:
+        categorias.append(NOMES_CATEGORIA[categoria])
+    espacos = []
+    for espaco in ESPACOS:
+        espacos.append(NOMES_ESPACO[espaco])
+    print("Categorias: " + ", ".join(categorias) + ".")
+    print("Espaços: " + ", ".join(espacos) + ".")
+    print("Os dados são fictícios e ficam só na memória: ao sair, tudo volta ao início.")
+
+
 # Cada opção do menu é um dicionário: número, texto na tela e a função que executa
 OPCOES = [
     {"numero": "1", "texto": "Listar todas as ocorrências", "funcao": opcao_listar},
@@ -182,6 +324,14 @@ OPCOES = [
     {"numero": "3", "texto": "Filtrar por categoria e/ou situação", "funcao": opcao_filtrar},
     {"numero": "4", "texto": "Cadastrar nova ocorrência", "funcao": opcao_cadastrar},
     {"numero": "5", "texto": "Atualizar a situação de uma ocorrência", "funcao": opcao_atualizar},
+    {"numero": "6", "texto": "Examinar a próxima ocorrência da fila", "funcao": opcao_examinar},
+    {"numero": "7", "texto": "Ver eventos recentes (pilha)", "funcao": opcao_eventos},
+    {"numero": "8", "texto": "Desfazer a última atualização", "funcao": opcao_desfazer},
+    {"numero": "9", "texto": "Ver indicadores", "funcao": opcao_indicadores},
+    {"numero": "10", "texto": "Ver prioridades (urgentes)", "funcao": opcao_prioridades},
+    {"numero": "11", "texto": "Ver a hierarquia bairro > categoria", "funcao": opcao_hierarquia},
+    {"numero": "12", "texto": "Avançar o dia simulado", "funcao": opcao_avancar_dia},
+    {"numero": "13", "texto": "Ajuda: significado das situações", "funcao": opcao_ajuda},
 ]
 
 
