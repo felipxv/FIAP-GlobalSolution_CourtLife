@@ -187,13 +187,20 @@ def montar_conclusao(sistema):
 
     lideres, maximo = categorias_com_mais_pendencias(ocorrencias)
     if len(lideres) > 0:
-        nomes = []
-        for categoria in lideres:
-            nomes.append(NOMES_CATEGORIA[categoria])
-        texto_nomes = nomes[0]
-        if len(nomes) > 1:
-            texto_nomes = ", ".join(nomes[:-1]) + " e " + nomes[-1]
-        linhas.append("- Mais pendências em: " + texto_nomes + " (" + str(maximo) + (" cada)." if len(nomes) > 1 else ")."))
+        texto_nomes = ""
+        for i in range(len(lideres)):
+            nome = NOMES_CATEGORIA[lideres[i]]
+            if i == 0:
+                texto_nomes = nome
+            elif i == len(lideres) - 1:
+                texto_nomes = texto_nomes + " e " + nome
+            else:
+                texto_nomes = texto_nomes + ", " + nome
+        if len(lideres) > 1:
+            final = " cada)."
+        else:
+            final = ")."
+        linhas.append("- Mais pendências em: " + texto_nomes + " (" + str(maximo) + final)
 
     urgentes = listar_urgentes(ocorrencias, dia)
     if len(urgentes) > 0:
