@@ -104,7 +104,10 @@ def inserir_na_fila(sistema, ocorrencia):
     posicao = len(fila)
     for i in range(len(fila)):
         outra = sistema["indice"][fila[i]]
-        if (ocorrencia["dia_abertura"], ocorrencia["id"]) < (outra["dia_abertura"], outra["id"]):
+        abriu_antes = ocorrencia["dia_abertura"] < outra["dia_abertura"]
+        mesmo_dia = ocorrencia["dia_abertura"] == outra["dia_abertura"]
+        codigo_menor = int(ocorrencia["id"]) < int(outra["id"])
+        if abriu_antes or (mesmo_dia and codigo_menor):
             posicao = i
             break
     fila.insert(posicao, ocorrencia["id"])
