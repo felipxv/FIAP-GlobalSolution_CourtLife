@@ -14,16 +14,11 @@ from acompanhamento import (cadastrar_ocorrencia, atualizar_status, examinar_pro
 from indicadores import avaliar_prioridade, listar_urgentes, mostrar_painel, dias_comprometidos
 
 
-def ler_texto(pergunta, se_acabar=""):
-    """ PROTÓTIPO: ler_texto(pergunta: str, se_acabar: str): str
-    Faz uma pergunta e devolve a resposta sem espaços nas pontas. Se a entrada acabar
-    (execução com dados redirecionados), devolve 'se_acabar' em vez de dar erro. """
+def ler_texto(pergunta):
+    """ PROTÓTIPO: ler_texto(pergunta: str): str
+    Faz uma pergunta e devolve a resposta sem espaços nas pontas. """
 
-    try:
-        return input(pergunta).strip()
-    except EOFError:
-        print()
-        return se_acabar
+    return input(pergunta).strip()
 
 
 def escolher(pergunta, chaves, nomes):
@@ -36,7 +31,7 @@ def escolher(pergunta, chaves, nomes):
     for i in range(len(chaves)):
         print(f"   {i + 1} - {nomes[chaves[i]]}")
     texto = ler_texto("Escolha (número ou nome; Enter deixa em branco): ")
-    if texto.isdigit() and 1 <= int(texto) <= len(chaves):
+    if texto.isdigit() and int(texto) >= 1 and int(texto) <= len(chaves):
         return chaves[int(texto) - 1]
     return texto.lower()
 
@@ -259,28 +254,26 @@ def opcao_prioridades(sistema):
         print("   (nenhuma)")
 
 
-def mostrar_hierarquia(no, indice, recuo):
-    """ PROTÓTIPO: mostrar_hierarquia(no: dict | list, indice: dict, recuo: str): None
-    Percorre a hierarquia bairro -> categoria -> códigos. É recursiva: se o nó é um
-    dicionário, desce um nível para cada chave; se é uma lista, imprime as ocorrências. """
+def mostrar_hierarquia(hierarquia, indice):
+    """ PROTÓTIPO: mostrar_hierarquia(hierarquia: dict, indice: dict): None
+    Percorre a hierarquia nível por nível: para cada bairro, cada categoria daquele bairro
+    e, dentro dela, os códigos das ocorrências. """
 
-    if isinstance(no, dict):
-        for chave in no:
-            if chave in NOMES_CATEGORIA:
-                print(f"{recuo}{NOMES_CATEGORIA[chave]} ({len(no[chave])})")
-            else:
-                print(f"{recuo}{chave}")
-            mostrar_hierarquia(no[chave], indice, recuo + "   ")
-    else:
-        for codigo in no:
-            print(f"{recuo}{codigo} [{NOMES_STATUS[indice[codigo]['status']]}] {indice[codigo]['descricao']}")
+    for bairro in hierarquia:
+        print(bairro)
+        for categoria in hierarquia[bairro]:
+            codigos = hierarquia[bairro][categoria]
+            print(f"   {NOMES_CATEGORIA[categoria]} ({len(codigos)})")
+            for codigo in codigos:
+                ocorrencia = indice[codigo]
+                print(f"      {codigo} [{NOMES_STATUS[ocorrencia['status']]}] {ocorrencia['descricao']}")
 
 
 def opcao_hierarquia(sistema):
     """ PROTÓTIPO: opcao_hierarquia(sistema: dict): None """
 
     print("\n--- HIERARQUIA: BAIRRO > CATEGORIA > OCORRÊNCIAS ---")
-    mostrar_hierarquia(sistema["hierarquia"], sistema["indice"], "")
+    mostrar_hierarquia(sistema["hierarquia"], sistema["indice"])
 
 
 def opcao_avancar_dia(sistema):
@@ -317,21 +310,21 @@ def opcao_ajuda(sistema):
     print("Os dados são fictícios e ficam só na memória: ao sair, tudo volta ao início.")
 
 
-# Cada opção do menu é um dicionário: número, texto na tela e a função que executa
+# Textos do menu, na ordem dos números das opções (a posição 0 da lista é a opção 1)
 OPCOES = [
-    {"numero": "1", "texto": "Listar todas as ocorrências", "funcao": opcao_listar},
-    {"numero": "2", "texto": "Consultar uma ocorrência pelo código", "funcao": opcao_consultar},
-    {"numero": "3", "texto": "Filtrar por categoria e/ou situação", "funcao": opcao_filtrar},
-    {"numero": "4", "texto": "Cadastrar nova ocorrência", "funcao": opcao_cadastrar},
-    {"numero": "5", "texto": "Atualizar a situação de uma ocorrência", "funcao": opcao_atualizar},
-    {"numero": "6", "texto": "Examinar a próxima ocorrência da fila", "funcao": opcao_examinar},
-    {"numero": "7", "texto": "Ver eventos recentes (pilha)", "funcao": opcao_eventos},
-    {"numero": "8", "texto": "Desfazer a última atualização", "funcao": opcao_desfazer},
-    {"numero": "9", "texto": "Ver indicadores", "funcao": opcao_indicadores},
-    {"numero": "10", "texto": "Ver prioridades (urgentes)", "funcao": opcao_prioridades},
-    {"numero": "11", "texto": "Ver a hierarquia bairro > categoria", "funcao": opcao_hierarquia},
-    {"numero": "12", "texto": "Avançar o dia simulado", "funcao": opcao_avancar_dia},
-    {"numero": "13", "texto": "Ajuda: significado das situações", "funcao": opcao_ajuda},
+    "Listar todas as ocorrências",
+    "Consultar uma ocorrência pelo código",
+    "Filtrar por categoria e/ou situação",
+    "Cadastrar nova ocorrência",
+    "Atualizar a situação de uma ocorrência",
+    "Examinar a próxima ocorrência da fila",
+    "Ver eventos recentes (pilha)",
+    "Desfazer a última atualização",
+    "Ver indicadores",
+    "Ver prioridades (urgentes)",
+    "Ver a hierarquia bairro > categoria",
+    "Avançar o dia simulado",
+    "Ajuda: significado das situações",
 ]
 
 
@@ -340,8 +333,8 @@ def mostrar_menu(sistema):
 
     print("\n" + "-" * 64)
     print(f"MENU | dia simulado {sistema['dia_atual']} | fila de espera: {len(sistema['fila'])}")
-    for opcao in OPCOES:
-        print(f"{opcao['numero']:>3} - {opcao['texto']}")
+    for i in range(len(OPCOES)):
+        print(f"{i + 1:>3} - {OPCOES[i]}")
     print("  0 - Sair")
 
 
@@ -357,18 +350,39 @@ def main():
     mostrar_cabecalho(sistema)
     while True:
         mostrar_menu(sistema)
-        escolha = ler_texto("Escolha uma opção: ", "0")
+        escolha = ler_texto("Escolha uma opção: ")
         if escolha == "0":
             print("Até logo! Os dados simulados voltam ao início na próxima execução.")
             break
-        executada = False
-        for opcao in OPCOES:
-            if escolha == opcao["numero"]:
-                opcao["funcao"](sistema)
-                executada = True
-        if not executada:
+        elif escolha == "1":
+            opcao_listar(sistema)
+        elif escolha == "2":
+            opcao_consultar(sistema)
+        elif escolha == "3":
+            opcao_filtrar(sistema)
+        elif escolha == "4":
+            opcao_cadastrar(sistema)
+        elif escolha == "5":
+            opcao_atualizar(sistema)
+        elif escolha == "6":
+            opcao_examinar(sistema)
+        elif escolha == "7":
+            opcao_eventos(sistema)
+        elif escolha == "8":
+            opcao_desfazer(sistema)
+        elif escolha == "9":
+            opcao_indicadores(sistema)
+        elif escolha == "10":
+            opcao_prioridades(sistema)
+        elif escolha == "11":
+            opcao_hierarquia(sistema)
+        elif escolha == "12":
+            opcao_avancar_dia(sistema)
+        elif escolha == "13":
+            opcao_ajuda(sistema)
+        else:
             print("Opção inválida: digite um número do menu, de 0 a " + str(len(OPCOES)) + ".")
 
 
-if __name__ == "__main__":
-    main()
+# ------- PROGRAMA PRINCIPAL
+main()
