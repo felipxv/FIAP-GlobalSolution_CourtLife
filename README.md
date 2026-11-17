@@ -9,7 +9,11 @@
 
 <h1 align="center">CourtLife: Neighborhood Action Dashboard</h1>
 
-## Integrantes:
+## Equipe
+
+**Nome da equipe:** <<PREENCHER>>
+
+Integrantes (grupo cadastrado no FIAP ON):
 
 - <a href="https://github.com/felipxv">Felipe de Barros Franco</a> RM575777
 - <a href="https://github.com/Guilherme-AVVO">Guilherme Santos</a> RM575786
@@ -131,6 +135,7 @@ A hierarquia ajuda a organizar as informações porque separa os problemas por l
 | Filtro             | `passa_categoria = categoria == "" or ocorrencia["categoria"] == categoria` e `if passa_categoria and passa_status` | OR, AND      |
 | Privacidade        | `"@" in texto or quantidade_digitos >= 8`                                                                           | OR           |
 | Conclusão sem data | `status == "concluida" and conclusao == ""`                                                                         | AND          |
+| Volta à fila       | `abriu_antes or (mesmo_dia and codigo_menor)`                                                                       | OR, AND      |
 | Prioridade         | `urgente = (convivencia or acessibilidade) and parada and not em_andamento`                                         | OR, AND, NOT |
 
 **A expressão de prioridade, em detalhe** (`avaliar_prioridade`):
@@ -317,7 +322,7 @@ Até logo! Os dados simulados voltam ao início na próxima execução.
 
 - Os dados são simulados e voltam ao início a cada execução (o cadastro e as atualizações não são gravados nos arquivos).
 - Não há integração com órgãos públicos, login nem promessa de atendimento das demandas.
-- A proteção de privacidade é simples: detecta e-mail e sequências de dígitos, na descrição.
+- A proteção de privacidade é simples: na descrição, recusa `@` (e-mail) e 8 ou mais dígitos no total (telefone); um texto com muitos números legítimos também seria recusado.
 - Os limites da prioridade (5 dias, quais espaços são de convivência) são escolhas da equipe e não vêm de uma norma.
 - A interface é só de terminal e não foi testada por pessoas que usam leitor de tela.
 
