@@ -90,7 +90,9 @@ Mudanças permitidas: `aberta` → `em_analise` → `concluida`, sempre nessa or
 
 - **`data/`** Bases de dados fictícias: `ocorrencias.csv` e `historico.csv`.
 
-- **`docs/`** Documentação do projeto: `uso_ia.md`, com o registro do uso de inteligência artificial.
+- **`docs/`** Documentação do projeto:
+  - `uso_ia.md`: registro do uso de inteligência artificial;
+  - `CourtLife-Contexto-do-Projeto.pdf`: documento técnico com a regra de prioridade em circuito lógico, as estruturas de dados e o capítulo das fases em que cada uma foi vista, a situação de cada requisito e os valores esperados na tela.
 
 - **`src/`** Código-fonte em Python:
   - `sistema.py`: menu e conversa com o usuário (arquivo executável);
