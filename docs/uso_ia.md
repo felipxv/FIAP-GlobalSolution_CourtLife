@@ -20,7 +20,7 @@ O enunciado da Global Solution permite usar IA, desde que a equipe compreenda, t
 **Pela IA, durante o desenvolvimento**
 
 - Os 9 testes automáticos de `src/testes.py` passaram (carga e validação, estruturas, consultas, cadastro, atualização, fila e pilha, indicadores, prioridade e mudanças de situação).
-- O menu foi executado com 300 sequências de entradas aleatórias (letras, números inválidos, textos longos, campos vazios, entrada interrompida), a partir de outra pasta, sem nenhum erro do Python.
+- O menu foi executado com 300 sequências de entradas aleatórias (letras, números inválidos, textos longos, campos vazios), a partir de outra pasta, sem nenhum erro do Python.
 - Os números do README (totais, proporções, tempos médios e ocorrências urgentes) foram comparados com o cálculo do próprio programa.
 - O código foi revisado para usar só o que o enunciado permite: Python básico, funções, condicionais, laços, listas, dicionários e leitura simples de arquivo. Nenhuma biblioteca externa foi usada, só o módulo `os` para achar os arquivos.
 
