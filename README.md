@@ -11,7 +11,7 @@
 
 ## Equipe
 
-**Nome da equipe:** <<PREENCHER>>
+**Nome da equipe:** CourtLife
 
 Integrantes (grupo cadastrado no FIAP ON):
 
@@ -295,7 +295,7 @@ Até logo! Os dados simulados voltam ao início na próxima execução.
 
 ## Vídeo de apresentação
 
-- **[Vídeo no YouTube (não listado)]** - Apresentação do CourtLife em funcionamento.
+- **[Vídeo no YouTube (não listado)](https://youtu.be/bUUkLBlnqu4)** - Apresentação do CourtLife em funcionamento.
 
 ## Links e Observações
 
@@ -313,7 +313,7 @@ Até logo! Os dados simulados voltam ao início na próxima execução.
 
 ### Observações Gerais
 
-- **Participação na Competição:**
+- **Participação na Competição:** Global Solution 2026.2 da FIAP, desafio CitizenTech (case Neighborhood Action Dashboard).
 - **Uso de IA:** a inteligência artificial apoiou o desenvolvimento; o registro de como os resultados foram verificados está em [`docs/uso_ia.md`](docs/uso_ia.md).
 
 ## Conclusões, limitações e aprendizados
